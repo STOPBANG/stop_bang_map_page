@@ -48,9 +48,10 @@ async function fetchAllData(sgg_nm, bjdong_nm) {
 
   return allFiltered;
 }
-module.exports = {
-  getAgency: async(req, res) => {
+
+exports.getAgency = async(req, res) => {
     const { sgg_nm, bjdong_nm } = req.query;
+    console.log(req.query);
     try {
       const filteredData = await fetchAllData(sgg_nm, bjdong_nm);
       if (filteredData.length > 0) {
@@ -62,40 +63,39 @@ module.exports = {
       console.error(`Error while processing request: ${err.stack}`);
       res.status(500).json({ error: 'Failed to fetch data' });
     }
-  },
-  getOneAgency: async(req, res) => {
-    const sgg_nm = req.query.sgg_nm;
-    const bjdong_nm = req.query.bjdong_nm;
-    const cmp_nm = '%'+req.query.cmp_nm+'%';
+  };
+exports.getOneAgency = async(req, res) => {
+  const sgg_nm = req.query.sgg_nm;
+  const bjdong_nm = req.query.bjdong_nm;
+  const cmp_nm = '%'+req.query.cmp_nm+'%';
 
-    try {
-      // 서울시 공공데이터 api
-      const apiResponse = await fetch(
-        `http://openapi.seoul.go.kr:8088/${process.env.API_KEY}/json/landBizInfo/1/1000/`
-      );
-      const js = await apiResponse.json();
+  try {
+    // 서울시 공공데이터 api
+    const apiResponse = await fetch(
+      `http://openapi.seoul.go.kr:8088/${process.env.API_KEY}/json/landBizInfo/1/1000/`
+    );
+    const js = await apiResponse.json();
 
-      // const rows = await searchModel.getAgenciesModel(sgg_nm, bjdong_nm);
-      const rows = js.landBizInfo.row;
-      const filtered = [];
+    // const rows = await searchModel.getAgenciesModel(sgg_nm, bjdong_nm);
+    const rows = js.landBizInfo.row;
+    const filtered = [];
 
-      for(const row of rows) {
-        if(row.CMP_NM.includes(req.query.cmp_nm)) {
-          filtered.push(row);
-          row.avg_rating = 0; // 여기 고치자 원채야
-          row.countReview = 0; // 여기 고치자 원채야
-        }
+    for(const row of rows) {
+      if(row.CMP_NM.includes(req.query.cmp_nm)) {
+        filtered.push(row);
+        row.avg_rating = 0; // 여기 고치자 원채야
+        row.countReview = 0; // 여기 고치자 원채야
       }
-      
-      res.json({ rows: filtered });
-      // const rows = await searchModel.getOneAgencyModel(sgg_nm,bjdong_nm,cmp_nm);
-      // res.json({ rows: rows });
-    } catch (err) {
-      console.error(err.stack)
     }
-    if (!res.headersSent) {  // 헤더가 이미 전송되지 않았는지 확인
-      res.status(500).json({ error: "Internal Server Error", details: err.stack });
-    }
+    
+    res.json({ rows: filtered });
+    // const rows = await searchModel.getOneAgencyModel(sgg_nm,bjdong_nm,cmp_nm);
+    // res.json({ rows: rows });
+  } catch (err) {
+    console.error(err.stack)
+  }
+  if (!res.headersSent) {  // 헤더가 이미 전송되지 않았는지 확인
+    res.status(500).json({ error: "Internal Server Error", details: err.stack });
   }
 }
 
