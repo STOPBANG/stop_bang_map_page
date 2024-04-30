@@ -14,8 +14,8 @@ router.get('/',(req,res,next)=>{
 
 });
 
-router.get("/agencies",searchControl.getAgency);
+router.post("/agencies",searchControl.getAgency);
 
-router.get("/agencyName",searchControl.getOneAgency);
+router.post("/agencyName",searchControl.getOneAgency);
 
 module.exports = router;

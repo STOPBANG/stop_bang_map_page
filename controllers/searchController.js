@@ -51,11 +51,11 @@ async function fetchAllData(sgg_nm, bjdong_nm) {
 
 exports.getAgency = async(req, res) => {
     console.log(req);
-    const { sgg_nm, bjdong_nm } = req.query;
+    const { sgg_nm, bjdong_nm } = req.body;
     try {
       const filteredData = await fetchAllData(sgg_nm, bjdong_nm);
       if (filteredData.length > 0) {
-        return res.json({ rows: filteredData });
+        return res.json(filteredData);
       } else {
         res.status(404).json({ message: "No matching data found." });
       }
@@ -82,14 +82,14 @@ exports.getOneAgency = async(req, res) => {
     const filtered = [];
 
     for(const row of rows) {
-      if(row.CMP_NM.includes(req.query.cmp_nm)) {
+      if(row.CMP_NM.includes(req.body.cmp_nm)) {
         filtered.push(row);
         row.avg_rating = 0; // 여기 고치자 원채야
         row.countReview = 0; // 여기 고치자 원채야
       }
     }
     
-    return res.json({ rows: filtered });
+    return res.json(filtered);
     // const rows = await searchModel.getOneAgencyModel(sgg_nm,bjdong_nm,cmp_nm);
     // res.json({ rows: rows });
   } catch (err) {
