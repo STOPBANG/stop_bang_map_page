@@ -55,7 +55,7 @@ exports.getAgency = async(req, res) => {
     try {
       const filteredData = await fetchAllData(sgg_nm, bjdong_nm);
       if (filteredData.length > 0) {
-        res.json({ rows: filteredData });
+        return res.json({ rows: filteredData });
       } else {
         res.status(404).json({ message: "No matching data found." });
       }
@@ -89,7 +89,7 @@ exports.getOneAgency = async(req, res) => {
       }
     }
     
-    res.json({ rows: filtered });
+    return res.json({ rows: filtered });
     // const rows = await searchModel.getOneAgencyModel(sgg_nm,bjdong_nm,cmp_nm);
     // res.json({ rows: rows });
   } catch (err) {
