@@ -74,7 +74,21 @@ async function fetchAllData(sgg_nm, bjdong_nm) {
   }
   return allFiltered;
 }
-
+exports.getAgency = async(req, res) => {
+  console.log(req);
+  const { sgg_nm, bjdong_nm } = req.body;
+  try {
+    const filteredData = await fetchAllData(sgg_nm, bjdong_nm);
+    if (filteredData.length > 0) {
+      return res.json(filteredData);
+    } else {
+      res.status(404).json({ message: "No matching data found." });
+    }
+  } catch (err) {
+    console.error(`Error while processing request: ${err.stack}`);
+    res.status(500).json({ error: 'Failed to fetch data' });
+  }
+};
 exports.getOneAgency = async(req, res) => {
   const sgg_nm = req.query.sgg_nm;
   const bjdong_nm = req.query.bjdong_nm;
