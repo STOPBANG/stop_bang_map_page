@@ -15,7 +15,6 @@ async function fetchAllData(sgg_nm, bjdong_nm) {
       const apiUrl = `http://openapi.seoul.go.kr:8088/${process.env.API_KEY}/json/landBizInfo/${start}/${start + count - 1}/`;
       try {
           const apiResponse = await fetch(apiUrl);
-          console.log(`Fetching data from ${start} to ${start + count - 1}`);
 
           if (!apiResponse.ok) {
               throw new Error(`HTTP error! Status: ${apiResponse.status}`);
@@ -45,7 +44,6 @@ async function fetchAllData(sgg_nm, bjdong_nm) {
                           let countReviews = result.body.length;
 
                           for (const review of result.body) {
-                              // console.log(`Rating: ${review.rating}, Content: ${review.content}`);
                               totalRating += review.rating;
                           }
 
@@ -57,7 +55,6 @@ async function fetchAllData(sgg_nm, bjdong_nm) {
                       allFiltered.push(row);
                   }
               }
-
               if (rows.length < count) {
                   hasMoreData = false; 
               } else {
@@ -75,7 +72,6 @@ async function fetchAllData(sgg_nm, bjdong_nm) {
   return allFiltered;
 }
 exports.getAgency = async(req, res) => {
-  console.log(req);
   const { sgg_nm, bjdong_nm } = req.body;
   try {
     const filteredData = await fetchAllData(sgg_nm, bjdong_nm);
