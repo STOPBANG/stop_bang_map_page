@@ -10,59 +10,70 @@ async function fetchAllData(sgg_nm, bjdong_nm) {
   let count = 1000;
   let hasMoreData = true;
   let allFiltered = [];
-  
+
   while (hasMoreData) {
-    const apiUrl = `http://openapi.seoul.go.kr:8088/${process.env.API_KEY}/json/landBizInfo/${start}/${start + count - 1}/`;
-    try {
-      const apiResponse = await fetch(apiUrl);
-      if (!apiResponse.ok) {
-        throw new Error(`HTTP error! Status: ${apiResponse.status}`);
-      }
-      const js = await apiResponse.json();
+      const apiUrl = `http://openapi.seoul.go.kr:8088/${process.env.API_KEY}/json/landBizInfo/${start}/${start + count - 1}/`;
+      try {
+          const apiResponse = await fetch(apiUrl);
+          console.log(`Fetching data from ${start} to ${start + count - 1}`);
 
-      // Check if the response includes the 'landBizInfo' and 'row' properties
-      if (js.landBizInfo && js.landBizInfo.row) {
-        const rows = js.landBizInfo.row;
+          if (!apiResponse.ok) {
+              throw new Error(`HTTP error! Status: ${apiResponse.status}`);
+          }
+          const js = await apiResponse.json();
 
-        const filtered = rows.filter(row => row.SGG_NM === sgg_nm && row.BJDONG_NM === bjdong_nm);
-        const modifiedFiltered = filtered.map(row => ({
-          ...row,  
-          avg_rating: 0, 
-          countReview: 0  
-        }));
-        allFiltered.push(...modifiedFiltered);
-        if (rows.length < count) {
-          hasMoreData = false; 
-        } else {
-          start += count;
-        }
-      } else {
-        console.log(`End of data or different structure: ${JSON.stringify(js)}`);
-        hasMoreData = false;
+          if (js.landBizInfo && js.landBizInfo.row) {
+              const rows = js.landBizInfo.row;
+              for (const row of rows) {
+                  if (row.SGG_NM === sgg_nm && row.BJDONG_NM === bjdong_nm) {
+                      const ra_regno = encodeURIComponent(row.RA_REGNO);
+                      /* [start] review DB 시작 - ra_regno 기준으로 가져오기 */
+                      const reviewGetOptions = {
+                          host: 'stop_bang_review_DB',
+                          port: process.env.PORT,
+                          path: `/db/review/findAllByRegno/${ra_regno}`,
+                          method: 'GET',
+                          headers: {
+                              'Content-Type': 'application/json',
+                          }
+                      };
+                      const result = await httpRequest(reviewGetOptions);
+                      row.avg_rating = 0; 
+                      row.countReview = 0; 
+                      if (result.body && result.body.length > 0) {
+                          let totalRating = 0;
+                          let countReviews = result.body.length;
+
+                          for (const review of result.body) {
+                              // console.log(`Rating: ${review.rating}, Content: ${review.content}`);
+                              totalRating += review.rating;
+                          }
+
+                          row.avg_rating = parseFloat((totalRating / countReviews).toFixed(1));
+                          row.countReview = countReviews;
+                      } else {
+                          console.log("No reviews found for this RA_REGNO.");
+                      }
+                      allFiltered.push(row);
+                  }
+              }
+
+              if (rows.length < count) {
+                  hasMoreData = false; 
+              } else {
+                  start += count;
+              }
+          } else {
+              console.log(`End of data or different structure: ${JSON.stringify(js)}`);
+              hasMoreData = false;
+          }
+      } catch (error) {
+          console.error(`Error fetching data: ${error}`);
+          hasMoreData = false;
       }
-    } catch (error) {
-      console.error(`Error fetching data: ${error}`);
-      hasMoreData = false;
-    }
   }
-
   return allFiltered;
 }
-
-exports.getAgency = async(req, res) => {
-  const { sgg_nm, bjdong_nm } = req.body;
-  try {
-    const filteredData = await fetchAllData(sgg_nm, bjdong_nm);
-    if (filteredData.length > 0) {
-      return res.json(filteredData);
-    } else {
-      res.status(404).json({ message: "No matching data found." });
-    }
-  } catch (err) {
-    console.error(`Error while processing request: ${err.stack}`);
-    res.status(500).json({ error: 'Failed to fetch data' });
-  }
-};
 
 exports.getOneAgency = async(req, res) => {
   const sgg_nm = req.query.sgg_nm;
