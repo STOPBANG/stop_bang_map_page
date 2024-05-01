@@ -50,7 +50,7 @@ async function fetchAllData(sgg_nm, bjdong_nm) {
                           row.avg_rating = parseFloat((totalRating / countReviews).toFixed(1));
                           row.countReview = countReviews;
                       } else {
-                          console.log("No reviews found for this RA_REGNO.");
+                          // console.log("No reviews found for this RA_REGNO.");
                       }
                       allFiltered.push(row);
                   }
@@ -61,11 +61,11 @@ async function fetchAllData(sgg_nm, bjdong_nm) {
                   start += count;
               }
           } else {
-              console.log(`End of data or different structure: ${JSON.stringify(js)}`);
+              // console.log(`End of data or different structure: ${JSON.stringify(js)}`);
               hasMoreData = false;
           }
       } catch (error) {
-          console.error(`Error fetching data: ${error}`);
+          // console.error(`Error fetching data: ${error}`);
           hasMoreData = false;
       }
   }
