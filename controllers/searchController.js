@@ -1,3 +1,8 @@
+const db = require("../config/db");
+const searchModel = require("../models/searchModel");
+const jwt = require("jsonwebtoken");
+const {httpRequest} = require('../utils/httpRequest');
+const fetch = require('node-fetch');
 async function fetchAllData(sgg_nm, bjdong_nm, cmp_nm = null) {
   let start = 1;
   let count = 1000;
