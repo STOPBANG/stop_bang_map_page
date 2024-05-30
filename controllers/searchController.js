@@ -23,7 +23,7 @@ async function fetchAllData(sgg_nm, bjdong_nm, cmp_nm = null) {
 
         for (const row of rows.filter(row => row.SGG_NM === sgg_nm && row.BJDONG_NM === bjdong_nm && (!cmp_nm || row.CMP_NM === cmp_nm))) {
           const getRatingOptions = {
-            host: "stop_bang_review",
+            host: "review-ms",
             port: process.env.PORT,
             path: `/review/avgRate/${(row.SYS_REGNO)}`,
             method: "GET",
