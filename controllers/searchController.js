@@ -53,6 +53,9 @@ async function fetchAllData(sgg_nm, bjdong_nm, cmp_nm = null) {
         console.log(`End of data or different structure: ${JSON.stringify(js)}`);
         hasMoreData = false;
       }
+       if (allFiltered.length >= 30) {
+        hasMoreData = false;
+      }
     } catch (error) {
       console.error(`Error fetching data: ${error}`);
       hasMoreData = false;
